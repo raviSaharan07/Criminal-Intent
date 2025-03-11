@@ -1,0 +1,11 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.CriminalIntent" parent="Theme.MaterialComponents.Light.DarkActionBar">
+        <!-- Customize your light theme here. -->
+        <item name="colorPrimary">#D90BED</item>
+    </style>
+
+   <style name="Theme.CriminalIntent" parent="Base.Theme.CriminalIntent" />
+
+
+</resources>

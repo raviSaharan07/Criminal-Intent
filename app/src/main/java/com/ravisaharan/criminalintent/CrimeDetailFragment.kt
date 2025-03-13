@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.addCallback
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -41,6 +42,17 @@ class CrimeDetailFragment : Fragment(){
             isSolved = false)
 
         Log.d(TAG,"The crime ID is: ${args.crimeId}")*/
+
+        val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
+            if(binding.crimeTitle.text.isBlank()){
+                binding.crimeTitle.error="Title is Required"
+            }else{
+                isEnabled = false
+                requireActivity().onBackPressedDispatcher.onBackPressed()
+            }
+        }
+
+        callback.isEnabled = true
     }
 
     override fun onCreateView(
@@ -60,6 +72,9 @@ class CrimeDetailFragment : Fragment(){
         binding.apply {
             crimeTitle.doOnTextChanged{text,_,_,_ ->
                 //crime=crime.copy(title = text.toString())
+                crimeDetailViewmodel.updateCrime {oldCrime ->
+                    oldCrime.copy(title = text.toString())
+                }
             }
 
             crimeDate.apply {
@@ -69,6 +84,9 @@ class CrimeDetailFragment : Fragment(){
 
             crimeSolved.setOnCheckedChangeListener{_,isChecked ->
                 //crime=crime.copy(isSolved = isChecked)
+                crimeDetailViewmodel.updateCrime { oldCrime ->
+                    oldCrime.copy(isSolved = isChecked)
+                }
             }
         }
 

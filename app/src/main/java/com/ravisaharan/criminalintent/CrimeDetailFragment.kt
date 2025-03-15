@@ -8,14 +8,17 @@ import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.ravisaharan.criminalintent.databinding.FragmentCrimeDetailBinding
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import java.util.Calendar
 import java.util.Date
 import java.util.UUID
 
@@ -23,9 +26,9 @@ import java.util.UUID
 
 class CrimeDetailFragment : Fragment(){
     private var _binding: FragmentCrimeDetailBinding?=null
+
     private val binding
         get()= checkNotNull(_binding){"Binding is Null Cannot Access it"}
-    //private lateinit var crime:Crime
 
     private val args:CrimeDetailFragmentArgs by navArgs()
 
@@ -35,13 +38,6 @@ class CrimeDetailFragment : Fragment(){
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        /*crime=Crime(id=UUID.randomUUID(),
-            title = "",
-            date= Date(),
-            isSolved = false)
-
-        Log.d(TAG,"The crime ID is: ${args.crimeId}")*/
 
         val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
             if(binding.crimeTitle.text.isBlank()){
@@ -71,19 +67,12 @@ class CrimeDetailFragment : Fragment(){
 
         binding.apply {
             crimeTitle.doOnTextChanged{text,_,_,_ ->
-                //crime=crime.copy(title = text.toString())
                 crimeDetailViewmodel.updateCrime {oldCrime ->
                     oldCrime.copy(title = text.toString())
                 }
             }
 
-            crimeDate.apply {
-                //text=crime.date.toString()
-                isEnabled=false
-            }
-
             crimeSolved.setOnCheckedChangeListener{_,isChecked ->
-                //crime=crime.copy(isSolved = isChecked)
                 crimeDetailViewmodel.updateCrime { oldCrime ->
                     oldCrime.copy(isSolved = isChecked)
                 }
@@ -96,6 +85,11 @@ class CrimeDetailFragment : Fragment(){
                     crime?.let { updateUi(it) }
                 }
             }
+        }
+
+        setFragmentResultListener(DatePickerFragment.REQUEST_KEY_DATE){_,bundle ->
+                val newDate = Date(bundle.getLong(DatePickerFragment.BUNDLE_KEY_DATE))
+                crimeDetailViewmodel.updateCrime { it.copy(date = newDate) }
         }
     }
 
@@ -111,6 +105,9 @@ class CrimeDetailFragment : Fragment(){
             }
 
             crimeDate.text=crime.date.toString()
+            crimeDate.setOnClickListener{
+                findNavController().navigate(CrimeDetailFragmentDirections.selectDate(crime.date))
+            }
             crimeSolved.isChecked=crime.isSolved
             }
         }

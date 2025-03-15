@@ -16,11 +16,15 @@ class CrimeRepository private constructor(context: Context,private val coroutine
 
     private val database : CrimeDatabase = Room.databaseBuilder(context.applicationContext,
         CrimeDatabase::class.java,
-        DATABASE_NAME).createFromAsset(DATABASE_NAME).build()
+        DATABASE_NAME)
+        //.createFromAsset(DATABASE_NAME)
+        .build()
 
     fun getCrimes() : Flow<List<Crime>> = database.crimeDao().getCrimes()
 
     suspend fun getCrime(id: UUID) : Crime = database.crimeDao().getCrime(id)
+
+    suspend fun addCrime(crime: Crime) = database.crimeDao().addCrime(crime)
 
     fun updateCrime(crime: Crime){
         coroutineScope.launch {

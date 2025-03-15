@@ -26,21 +26,9 @@ class CrimeListViewmodel : ViewModel() {
           }
         }
     }
-    /*
-        suspend fun loadCrimes(): List<Crime>{
-            val result= mutableListOf<Crime>()
-            delay(5000)
 
-            for(i in 0 until 100){
-                val crime=Crime(
-                    id= UUID.randomUUID(),
-                    title="Crime #$i",
-                    date= Date(),
-                    isSolved = i % 2 == 0)
+    suspend fun addCrime(crime: Crime) {
+        crimeRepository.addCrime(crime)
+    }
 
-                result+=crime
-            }
-            return result
-            return crimeRepository.getCrimes()
-            }*/
     }

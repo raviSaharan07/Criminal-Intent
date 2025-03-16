@@ -1,6 +1,8 @@
 package com.ravisaharan.criminalintent
 
+import android.content.Intent
 import android.os.Bundle
+import android.text.format.DateFormat
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -23,6 +25,7 @@ import java.util.Date
 import java.util.UUID
 
 //private const val TAG="CrimeDetailFragment"
+private const val DATE_FORMAT = "EEE, MMM, dd"
 
 class CrimeDetailFragment : Fragment(){
     private var _binding: FragmentCrimeDetailBinding?=null
@@ -109,6 +112,39 @@ class CrimeDetailFragment : Fragment(){
                 findNavController().navigate(CrimeDetailFragmentDirections.selectDate(crime.date))
             }
             crimeSolved.isChecked=crime.isSolved
+
+            crimeReport.setOnClickListener{
+                val reportIntent = Intent(Intent.ACTION_SEND).apply {
+                    type="text/plain"
+                    putExtra(Intent.EXTRA_SUBJECT,getString(R.string.crime_report_subject))
+                    putExtra(Intent.EXTRA_TEXT,getCrimeReport(crime))
+
+                }
+
+                val chooserIntent=Intent.createChooser(reportIntent,getString(R.string.send_report))
+
+                startActivity(chooserIntent)
             }
         }
+
+
+    }
+
+    private fun getCrimeReport(crime:Crime) : String {
+        val solvedString = if(crime.isSolved){
+            getString(R.string.crime_report_solved)
+        }else{
+            getString(R.string.crime_report_unsolved)
+        }
+
+        val dateString = DateFormat.format(DATE_FORMAT,crime.date).toString()
+
+        val suspectString=if(crime.suspect.isBlank()){
+            getString(R.string.crime_report_no_suspect)
+        }else{
+            getString(R.string.crime_report_suspect,crime.suspect)
+        }
+
+        return getString(R.string.crime_report,crime.title,dateString,solvedString,suspectString)
+    }
 }

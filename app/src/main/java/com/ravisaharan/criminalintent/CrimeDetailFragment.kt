@@ -1,13 +1,16 @@
 package com.ravisaharan.criminalintent
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.ContactsContract
 import android.text.format.DateFormat
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
@@ -37,6 +40,10 @@ class CrimeDetailFragment : Fragment(){
 
     private val crimeDetailViewmodel : CrimeDetailViewmodel by viewModels{
         CrimeDetailViewModelFactory(args.crimeId)
+    }
+
+    private val  selectSuspect = registerForActivityResult(ActivityResultContracts.PickContact()){uri ->
+        uri?.let{parseContactSelection(it)}
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,6 +86,10 @@ class CrimeDetailFragment : Fragment(){
                 crimeDetailViewmodel.updateCrime { oldCrime ->
                     oldCrime.copy(isSolved = isChecked)
                 }
+            }
+
+            crimeSuspect.setOnClickListener{
+                selectSuspect.launch(null)
             }
         }
 
@@ -125,6 +136,12 @@ class CrimeDetailFragment : Fragment(){
 
                 startActivity(chooserIntent)
             }
+
+            crimeSuspect.text=crime.suspect.ifEmpty {
+                getString(R.string.crime_suspect_text)
+            }
+
+
         }
 
 
@@ -146,5 +163,20 @@ class CrimeDetailFragment : Fragment(){
         }
 
         return getString(R.string.crime_report,crime.title,dateString,solvedString,suspectString)
+    }
+
+    private fun parseContactSelection(contactUri : Uri){
+        val queryFields = arrayOf(ContactsContract.Contacts.DISPLAY_NAME)
+
+        val queryCursor=requireActivity().contentResolver.query(contactUri,queryFields,null,null,null)
+
+        queryCursor?.use {cursor ->
+            if(cursor.moveToFirst()){
+                val suspect = cursor.getString(0)
+                crimeDetailViewmodel.updateCrime { oldCrime ->
+                    oldCrime.copy(suspect = suspect)
+                }
+            }
+        }
     }
 }

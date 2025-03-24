@@ -11,6 +11,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
@@ -178,7 +179,12 @@ class CrimeDetailFragment : Fragment(){
 
             updatePhoto(crime.photoFileName)
 
+            crimePhoto.setOnClickListener{
+                crime.photoFileName?.let{findNavController().navigate(CrimeDetailFragmentDirections.zoomImageFragment(it))}
+                    ?:Toast.makeText(requireContext(),
+                        getString(R.string.no_image_to_show),Toast.LENGTH_SHORT).show()
 
+            }
         }
 
 
